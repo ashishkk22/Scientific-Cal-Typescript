@@ -1,4 +1,6 @@
-type constantArr<T> = Readonly<T[]>;
+type constantArr<TOperator> = Readonly<TOperator[]>;
+type angle = "DEG" | "RAD" | "GRAD";
+type debounceInput = HTMLDivElement[] | DOMRect[];
 //array to check the operations
 const arrayOfOperations: constantArr<string> = [
   "1",
@@ -60,7 +62,7 @@ const trigonoOperations: constantArr<string> = [
   "cot-h-in",
 ];
 
-let unitOfAngle: string = "DEG";
+let unitOfAngle: angle = "DEG";
 
 export const inputField = document.querySelector("textarea") as
   | HTMLTextAreaElement
@@ -75,7 +77,7 @@ export function setValueInLocal(key: string, value: string): void {
 
 //get the values from the local storage
 export function getValueFromLocal(key: string): string {
-  const result: string | null = localStorage.getItem(key);
+  const result = localStorage.getItem(key);
   if (!result) {
     setValueInLocal(key, "");
     return "";
@@ -108,11 +110,11 @@ export function isOperationPresent(clickedItem: string): string {
 
 //fn that is going to just add the operation in the string
 export function simpleCalculation(value: string): void {
-  let string: string = getValueFromLocal("calString");
-  if (string.charAt(0) === "0" && string.charAt(1) !== "0")
-    string = string.substring(1);
-  string += value;
-  setCharAtInputField(string);
+  let valueFromLocal = getValueFromLocal("calString");
+  if (valueFromLocal.charAt(0) === "0" && valueFromLocal.charAt(1) !== "0")
+    valueFromLocal = valueFromLocal.substring(1);
+  valueFromLocal += value;
+  setCharAtInputField(valueFromLocal);
 }
 
 //going to fire on = click
@@ -121,33 +123,36 @@ export function calculationOfSimpleCal(stringFromLocalStorage: string): void {
 }
 
 //main fn to handle the all cal logics
-function stringCalHandler(str: string): void {
+function stringCalHandler(inputStr: string): void {
   try {
-    str = str?.replaceAll("!", '["factorial"]()');
-    str = str?.replaceAll("e", "2.7182");
-    str = str?.replaceAll("π", "3.14");
-    if (str?.includes("rt")) {
-      customRootCal(str);
+    inputStr = inputStr?.replaceAll("!", '["factorial"]()');
+    inputStr = inputStr?.replaceAll("e", "2.7182");
+    inputStr = inputStr?.replaceAll("π", "3.14");
+    if (inputStr?.includes("rt")) {
+      customRootCal(inputStr);
       return;
-    } else if (str.includes("log")) {
-      logCal(str, 10);
+    } else if (inputStr.includes("log")) {
+      logCal(inputStr, 10);
       return;
-    } else if (str.includes("ln")) {
-      logCal(str, 2.7182);
+    } else if (inputStr.includes("ln")) {
+      logCal(inputStr, 2.7182);
       return;
     }
-    str = eval(str);
-    setCharAtInputField(str);
+    inputStr = eval(inputStr);
+    setCharAtInputField(inputStr);
   } catch (err) {
     showErrForSomeTime("Invalid Input!");
   }
 }
 
 //custom root fn logic
-function customRootCal(str: string): void {
-  const firstNumber: string = str.slice(0, str.indexOf("rt"));
-  const secondNumber: string = str.slice(str.indexOf("rt") + 2, str.length);
-  let result: string = "";
+function customRootCal(inputStr: string): void {
+  const firstNumber = inputStr.slice(0, inputStr.indexOf("rt"));
+  const secondNumber = inputStr.slice(
+    inputStr.indexOf("rt") + 2,
+    inputStr.length
+  );
+  let result = "";
   try {
     result = eval(`${Number(secondNumber) ** (1 / Number(firstNumber))}`);
   } catch (err) {
@@ -158,23 +163,28 @@ function customRootCal(str: string): void {
 }
 
 //log cal fn with diff. bases logic
-function logCal(str: string, base: number): void {
-  let result: number = 0;
-  if (str.indexOf("g") !== -1 && !str.includes("(")) {
+function logCal(inputStr: string, base: number): void {
+  let result = 0;
+  if (inputStr.indexOf("g") !== -1 && !inputStr.includes("(")) {
     result =
-      Math.log(Number(str.slice(str.indexOf("g") + 1, str.length))) /
-      Math.log(base);
-  } else if (str.includes("(") && str.includes(")")) {
-    const customBase: string = str.slice(
-      str.indexOf("(") + 1,
-      str.indexOf(")")
+      Math.log(
+        Number(inputStr.slice(inputStr.indexOf("g") + 1, inputStr.length))
+      ) / Math.log(base);
+  } else if (inputStr.includes("(") && inputStr.includes(")")) {
+    const customBase = inputStr.slice(
+      inputStr.indexOf("(") + 1,
+      inputStr.indexOf(")")
     );
-    const value: string = str.slice(str.indexOf("g") + 1, str.indexOf("("));
+    const value = inputStr.slice(
+      inputStr.indexOf("g") + 1,
+      inputStr.indexOf("(")
+    );
     result = Math.log(Number(value)) / Math.log(Number(customBase));
   } else {
     result =
-      Math.log(Number(str.slice(str.indexOf("n") + 1, str.length))) /
-      Math.log(base);
+      Math.log(
+        Number(inputStr.slice(inputStr.indexOf("n") + 1, inputStr.length))
+      ) / Math.log(base);
   }
   if (isNaN(result)) {
     showErrForSomeTime();
@@ -184,26 +194,26 @@ function logCal(str: string, base: number): void {
 }
 
 //backspace btn logic to remove last char
-export function removeCharFromCal(string: string): void {
-  string = string?.substring(0, string.length - 1);
-  setCharAtInputField(string);
+export function removeCharFromCal(inputStr: string): void {
+  inputStr = inputStr?.substring(0, inputStr.length - 1);
+  setCharAtInputField(inputStr);
 }
 
 //fn to set the string in the input field
-export function setCharAtInputField(string: string): void {
+export function setCharAtInputField(inputVal: string): void {
   if (inputField == undefined) return;
-  setValueInLocal("calString", string);
-  inputField.value = string;
+  setValueInLocal("calString", inputVal);
+  inputField.value = inputVal;
 }
 
 //diff. square and root combination fn logic
 export function powerAndRootCal(
-  string: string,
-  power: string = "1",
-  factor: string = "1"
+  inputStr: string,
+  power = "1",
+  factor = "1"
 ): void {
-  const output: number = Number(factor) / Number(power);
-  const result: number = Math.pow(Number(string), output);
+  const output = Number(factor) / Number(power);
+  const result = Math.pow(Number(inputStr), output);
   if (isNaN(result)) {
     showErrForSomeTime();
     return;
@@ -212,8 +222,8 @@ export function powerAndRootCal(
 }
 
 //abs cal logic
-export function absCal(string: string): void {
-  const output: number = Math.abs(Number(string));
+export function absCal(inputStr: string): void {
+  const output = Math.abs(Number(inputStr));
   if (isNaN(output)) {
     showErrForSomeTime();
     return;
@@ -222,8 +232,8 @@ export function absCal(string: string): void {
 }
 
 //random number gen with below input value
-export function randomNumberGenerator(string: string): void {
-  const randomNumber: number = Math.floor(Math.random() * Number(string));
+export function randomNumberGenerator(rangeStr: string): void {
+  const randomNumber = Math.floor(Math.random() * Number(rangeStr));
   if (isNaN(randomNumber)) {
     showErrForSomeTime();
     return;
@@ -232,8 +242,8 @@ export function randomNumberGenerator(string: string): void {
 }
 
 //cal floorN from input
-export function floorNumberCal(string: string): void {
-  const newRoundOfNumber: number = Math.floor(Number(string));
+export function floorNumberCal(inputStr: string): void {
+  const newRoundOfNumber = Math.floor(Number(inputStr));
   if (isNaN(newRoundOfNumber)) {
     showErrForSomeTime();
     return;
@@ -242,8 +252,8 @@ export function floorNumberCal(string: string): void {
 }
 
 //cal celiN from input
-export function celiNumberCal(string: string): void {
-  const newCeliNumber: number = Math.ceil(Number(string));
+export function celiNumberCal(inputStr: string): void {
+  const newCeliNumber: number = Math.ceil(Number(inputStr));
   if (isNaN(newCeliNumber)) {
     showErrForSomeTime();
     return;
@@ -252,16 +262,16 @@ export function celiNumberCal(string: string): void {
 }
 
 //append the string at start
-export function stringPreAdder(string: string, addString: string): void {
-  string = addString + string;
-  setCharAtInputField(string);
+export function stringPreAdder(inputStr: string, addString: string): void {
+  inputStr = addString + inputStr;
+  setCharAtInputField(inputStr);
 }
 
 //=== stored memory cal fn ===
 export function addTheValueToMemory(): void {
-  const string: string = getValueFromLocal("calString");
-  const storedNum: string = getValueFromLocal("storedNum");
-  const value: number = Number(string) + Number(storedNum);
+  const valueFromLocal = getValueFromLocal("calString");
+  const storedNum = getValueFromLocal("storedNum");
+  const value = Number(valueFromLocal) + Number(storedNum);
   if (isNaN(value)) {
     showErrForSomeTime("Invalid Input!");
     return;
@@ -271,9 +281,9 @@ export function addTheValueToMemory(): void {
 
 //minus the value from the stored
 export function removeTheValueFromMemory(): void {
-  const string: string = getValueFromLocal("calString");
-  const storedNum: string = getValueFromLocal("storedNum");
-  const value: number = Number(storedNum) - Number(string);
+  const valFromLocal = getValueFromLocal("calString");
+  const storedNum = getValueFromLocal("storedNum");
+  const value = Number(storedNum) - Number(valFromLocal);
   if (isNaN(value)) {
     showErrForSomeTime("Invalid Input!");
     return;
@@ -283,35 +293,26 @@ export function removeTheValueFromMemory(): void {
 
 //show the output of cal (stored num)
 export function recallTheValueFromMemory(): void {
-  const string: string = getValueFromLocal("storedNum");
-  setCharAtInputField(string);
+  const valFromLocal = getValueFromLocal("storedNum");
+  setCharAtInputField(valFromLocal);
 }
 
 //error handling function
-function showErrForSomeTime(string: string = "Invalid Input !"): void {
-  const errorDiv: HTMLElement | null = document.getElementById("error-div");
+function showErrForSomeTime(inputErrStr = "Invalid Input !"): void {
+  const errorDiv = document.getElementById("error-div");
   if (errorDiv == undefined) return;
-  errorDiv.innerHTML = string;
+  errorDiv.innerHTML = inputErrStr;
   setTimeout(() => {
     errorDiv.innerHTML = "";
   }, 5000);
 }
 
 // === drawer and related to that fns ===
-export function dynamicStyleDrawer(
-  drawerContent: HTMLDivElement | undefined,
-  rect: DOMRect | undefined
-): void {
-  if (drawerContent == undefined || rect == undefined) return;
-  drawerContent.style.bottom = `calc(100% - ${rect.bottom}px)`;
-  drawerContent.style.height = `${rect.height * 0.65}px`;
-  drawerContent.style.width = `${rect.width}px`;
-}
 
 //debounce polyfill
 function myDebounce(cb: Function, d: number): Function {
   let timer: ReturnType<typeof setTimeout>;
-  return function (...args: HTMLDivElement[] | DOMRect[]) {
+  return function (...args: debounceInput) {
     if (timer) clearTimeout(timer);
     timer = setTimeout(() => {
       cb(...args);
@@ -325,6 +326,16 @@ export const dynamicStyleDrawerWithDebounce: Function = myDebounce(
   1000
 );
 
+export function dynamicStyleDrawer(
+  drawerContent: HTMLDivElement | undefined,
+  rect: DOMRect | undefined
+): void {
+  if (drawerContent == undefined || rect == undefined) return;
+  drawerContent.style.bottom = `calc(100% - ${rect.bottom}px)`;
+  drawerContent.style.height = `${rect.height * 0.65}px`;
+  drawerContent.style.width = `${rect.width}px`;
+}
+
 export function drawerShow(drawerContent: HTMLDivElement | undefined): void {
   if (drawerContent == undefined) return;
   drawerContent.style.display = "inline";
@@ -337,8 +348,8 @@ export function drawerClose(drawerContent: HTMLDivElement | undefined): void {
 
 //show the stored nums with child append
 export function showStoredNumbers(): void {
-  const arrayOfNumbers: string[] = getValueFromLocal("storedNums")?.split(",");
-  const errMsg: HTMLElement | null = document.getElementById("empty-msg");
+  const arrayOfNumbers = getValueFromLocal("storedNums")?.split(",");
+  const errMsg = document.getElementById("empty-msg");
   let flagForMsg: Boolean = false;
   if (arrayOfNumbers[0] == "") flagForMsg = true;
   if (errMsg != undefined) {
@@ -346,12 +357,12 @@ export function showStoredNumbers(): void {
       ? (errMsg.innerText = "There's is nothing saved in your memory")
       : (errMsg.innerText = "");
   }
-  const storedDiv: Element | null = document.querySelector(".calDiv__numsDiv");
+  const storedDiv = document.querySelector(".calDiv__numsDiv");
   if (storedDiv == undefined) return;
   if (storedDiv.firstChild) {
     storedDiv.textContent = "";
   }
-  const child: string[] = arrayOfNumbers?.map(number => {
+  const child = arrayOfNumbers?.map(number => {
     return `<p class="me-3 h5" > ${number} </p>`;
   });
   if (child != undefined) {
@@ -363,8 +374,8 @@ export function showStoredNumbers(): void {
 
 //remove number from the ui and memory
 export function removeNumbers(): void {
-  const storedDiv: Element | null = document.querySelector(".calDiv__numsDiv");
-  const errMsg: HTMLElement | null = document.getElementById("empty-msg");
+  const storedDiv = document.querySelector(".calDiv__numsDiv");
+  const errMsg = document.getElementById("empty-msg");
   if (errMsg == undefined) return;
   if (storedDiv?.firstChild) {
     storedDiv.textContent = "";
@@ -414,17 +425,17 @@ export function changeInUnitOfAngle(): void {
 }
 
 //based on the string changing html value
-function changeTheUnitInHtml(string: string): void {
+function changeTheUnitInHtml(unitStr: string): void {
   const unitOfAngleBtn = document.getElementById("unit-of-angle") as
     | HTMLButtonElement
     | undefined;
   if (unitOfAngleBtn == undefined) return;
-  unitOfAngleBtn.innerHTML = string;
+  unitOfAngleBtn.innerHTML = unitStr;
 }
 
 export function toExponentialConvert(): void {
-  const string: string = getValueFromLocal("calString");
-  const expoNum: string = Number.parseFloat(string).toExponential();
+  const valFromLocal = getValueFromLocal("calString");
+  const expoNum = Number.parseFloat(valFromLocal).toExponential();
   if (isNaN(Number(expoNum))) {
     showErrForSomeTime("Invalid Input!");
     return;
@@ -434,28 +445,28 @@ export function toExponentialConvert(): void {
 
 //change the value plus to minus or minus to plus
 export function changeTheValue(): void {
-  let value: string = getValueFromLocal("calString");
-  if (value.charAt(0) === "-") {
-    value = value.substring(1, value.length);
+  let valueFromLocal = getValueFromLocal("calString");
+  if (valueFromLocal.charAt(0) === "-") {
+    valueFromLocal = valueFromLocal.substring(1, valueFromLocal.length);
   } else {
-    value = "-" + value;
+    valueFromLocal = "-" + valueFromLocal;
   }
-  setCharAtInputField(value);
+  setCharAtInputField(valueFromLocal);
 }
 
 //degree to dms
 export function degToDms(): void {
-  const string: string = getValueFromLocal("calString");
-  const deg: number = Number(string);
+  const valueFromLocal = getValueFromLocal("calString");
+  const deg = Number(valueFromLocal);
   if (unitOfAngle === "DEG" || isNaN(Number(deg))) {
     showErrForSomeTime("Please enter the input in DEG with numbers!");
     return;
   }
-  let d: number = Math.floor(deg);
-  const minfloat: number = (deg - d) * 60;
-  let m: number = Math.floor(minfloat);
-  const secfloat: number = (minfloat - m) * 60;
-  let s: number = Math.round(secfloat);
+  let d = Math.floor(deg);
+  const minfloat = (deg - d) * 60;
+  let m = Math.floor(minfloat);
+  const secfloat = (minfloat - m) * 60;
+  let s = Math.round(secfloat);
   // After rounding, the seconds might become 60.
   if (s === 60) {
     m++;
@@ -465,26 +476,26 @@ export function degToDms(): void {
     d++;
     m = 0;
   }
-  const output: string = "" + d + ":" + m + ":" + s;
+  const output = "" + d + ":" + m + ":" + s;
   setCharAtInputField(output);
 }
 
 //radian, grade to deg
 export function inputToDeg(): void {
-  const stringFromLocal: string = getValueFromLocal("calString");
-  let value: number = Number(stringFromLocal);
+  const stringFromLocal = getValueFromLocal("calString");
+  let valueFromLocal = Number(stringFromLocal);
   if (unitOfAngle === "DEG") {
     return;
   } else if (unitOfAngle === "RAD") {
-    value = value * (180 / Math.PI);
+    valueFromLocal = valueFromLocal * (180 / Math.PI);
   } else if (unitOfAngle === "GRAD") {
-    value = value / 0.0157;
+    valueFromLocal = valueFromLocal / 0.0157;
   }
-  if (isNaN(value)) {
+  if (isNaN(valueFromLocal)) {
     showErrForSomeTime("Please enter Numbers!");
     return;
   }
-  setCharAtInputField(String(value));
+  setCharAtInputField(String(valueFromLocal));
 }
 
 //operation is Trigono or not
@@ -496,8 +507,8 @@ export function isTrigonoCal(clickedItem: string): void {
 
 //to handle all the trigonometry operations
 function trigonoOperationHandler(clickedItem: string): void {
-  const stringFromLocal: string = getValueFromLocal("calString");
-  let value: number = Number(stringFromLocal);
+  const stringFromLocal = getValueFromLocal("calString");
+  let value = Number(stringFromLocal);
   if (unitOfAngle === "DEG") {
     //converting degree to radian
     value = value * (Math.PI / 180);

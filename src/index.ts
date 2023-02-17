@@ -39,7 +39,7 @@ let memoryStoreValues: string[] = [];
 const mainDivOfCal = document.getElementById("calculator-div") as
   | HTMLDivElement
   | undefined;
-let rect: DOMRect | undefined = mainDivOfCal?.getBoundingClientRect();
+let rect = mainDivOfCal?.getBoundingClientRect();
 const drawerContent = document.querySelector(".calDiv_drawer") as
   | HTMLDivElement
   | undefined;
@@ -82,14 +82,12 @@ mainDivOfCal?.addEventListener("click", (e: MouseEvent): void => {
   if (e.target === e.currentTarget) return;
 
   //getting stored values
-  let stringFromLocalStorage: string = getValueFromLocal("calString");
-  const storedNumberOutput: string = getValueFromLocal("storedNum");
+  let stringFromLocalStorage = getValueFromLocal("calString");
+  const storedNumberOutput = getValueFromLocal("storedNum");
   if (storedNumberOutput === "") setValueInLocal("storedNum", "0");
 
   //getting the id of clicked ele
-  let clickedItem: string | undefined = (
-    e.target as HTMLButtonElement | undefined
-  )?.id;
+  let clickedItem = (e.target as HTMLButtonElement | undefined)?.id;
   if (clickedItem == undefined) return;
 
   switch (clickedItem) {
@@ -197,8 +195,7 @@ mainDivOfCal?.addEventListener("click", (e: MouseEvent): void => {
       if (flagForHypBtn) {
         break;
       }
-      const btnsOfTrigono: HTMLCollectionOf<Element> =
-        document.getElementsByClassName("trigono-btn");
+      const btnsOfTrigono = document.getElementsByClassName("trigono-btn");
       changeButtonColor(e.target);
       secondBtnShow(btnsOfTrigono);
       flagForToggleBtn === false
@@ -207,13 +204,12 @@ mainDivOfCal?.addEventListener("click", (e: MouseEvent): void => {
       break;
     case "second-fn-Trigono-h":
       if (flagForToggleBtn) {
-        const btnOfHTrigonoInverse: HTMLCollectionOf<Element> =
+        const btnOfHTrigonoInverse =
           document.getElementsByClassName("trigono-h-inv");
         changeButtonColor(e.target);
         secondBtnShow(btnOfHTrigonoInverse);
       } else {
-        const btnOfHTrigono: HTMLCollectionOf<Element> =
-          document.getElementsByClassName("trigono-h-btn");
+        const btnOfHTrigono = document.getElementsByClassName("trigono-h-btn");
         changeButtonColor(e.target);
         secondBtnShow(btnOfHTrigono);
       }
@@ -222,8 +218,7 @@ mainDivOfCal?.addEventListener("click", (e: MouseEvent): void => {
         : (flagForHypBtn = false);
       break;
     case "second-fn":
-      const allBtnForToggle: HTMLCollectionOf<Element> =
-        document.getElementsByClassName("2nd-toggle-btn");
+      const allBtnForToggle = document.getElementsByClassName("2nd-toggle-btn");
       changeButtonColor(e.target);
       secondBtnShow(allBtnForToggle);
       break;
