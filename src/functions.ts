@@ -1,8 +1,8 @@
-type constantArr<TOperator> = Readonly<TOperator[]>;
-type angle = "DEG" | "RAD" | "GRAD";
+type ConstantArr<TOperator> = Readonly<TOperator[]>;
+type Angle = "DEG" | "RAD" | "GRAD";
 type debounceInput = HTMLDivElement[] | DOMRect[];
 //array to check the operations
-const arrayOfOperations: constantArr<string> = [
+const arrayOfOperations: ConstantArr<string> = [
   "1",
   "2",
   "3",
@@ -35,7 +35,7 @@ const arrayOfOperations: constantArr<string> = [
 ];
 
 //all trigonometry operation's array
-const trigonoOperations: constantArr<string> = [
+const trigonoOperations: ConstantArr<string> = [
   "sin",
   "sin-h",
   "sin-in",
@@ -62,7 +62,7 @@ const trigonoOperations: constantArr<string> = [
   "cot-h-in",
 ];
 
-let unitOfAngle: angle = "DEG";
+let unitOfAngle: Angle = "DEG";
 
 export const inputField = document.querySelector("textarea") as
   | HTMLTextAreaElement
