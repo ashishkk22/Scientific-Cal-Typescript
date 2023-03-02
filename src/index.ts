@@ -32,8 +32,9 @@ import {
   stringPreAdder,
   toExponentialConvert,
 } from "./functions";
-let flagForToggleBtn: boolean = false;
-let flagForHypBtn: boolean = false;
+
+let flagForToggleBtn = false;
+let flagForHypBtn = false;
 let memoryStoreValues: string[] = [];
 
 const mainDivOfCal = document.getElementById("calculator-div") as
